@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import http from '../http'
+import { usePersonneStore } from './personne'
 
 export const useAuthStore = defineStore('auth', {
   persist: true,
@@ -17,17 +18,21 @@ export const useAuthStore = defineStore('auth', {
     init() {
       if (this.token) {
         http.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+        const personne = usePersonneStore()
+        personne.fetch()
       }
     },
-    async login(email, password) {
-      try {
-        const res = await http.post('/login', { email, password })
-        this.token = res.data.token
-        this.user = res.data.user
-        this.error = null
-        http.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
-        return true
-      } catch (err) {
+      async login(email, password) {
+        try {
+          const res = await http.post('/login', { email, password })
+          this.token = res.data.token
+          this.user = res.data.user
+          this.error = null
+          http.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          const personne = usePersonneStore()
+          await personne.fetch()
+          return true
+        } catch (err) {
         console.log(err)
         this.error = err.response?.data?.message || 'Login failed'
         return false
