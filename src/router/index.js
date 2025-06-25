@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import HomeView from '../views/HomeView.vue'
+import PersonneView from '../views/PersonneView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
@@ -9,6 +10,11 @@ const routes = [
     path: '/',
     component: HomeView,
     meta: { requiresAuth: true }, // ← protected route
+  },
+  {
+    path: '/personnes',
+    component: PersonneView,
+    meta: { requiresAuth: true },
   },
 ]
 
