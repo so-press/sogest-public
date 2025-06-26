@@ -4,13 +4,23 @@ import http from '../http'
 export const useAuthStore = defineStore('auth', {
   persist: true,
   state: () => ({
-    user: null,
     token: null,
+    userId: null,
     error: null,
   }),
 
   getters: {
     isAuthenticated: (state) => !!state.token,
+    user: (state) => {
+      if (!state.token) return null
+      try {
+        const base64 = state.token.split('.')[1]
+        const json = atob(base64)
+        return JSON.parse(json)
+      } catch (e) {
+        return null
+      }
+    },
   },
 
   actions: {
@@ -23,7 +33,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const res = await http.post('/login', { email, password })
         this.token = res.data.token
-        this.user = res.data.user
+        this.userId = res.data.userId
         this.error = null
         http.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
         return true
@@ -34,7 +44,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     logout() {
-      this.user = null
+      this.userId = null
       this.token = null
       delete http.defaults.headers.common['Authorization']
     },
